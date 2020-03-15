@@ -53,6 +53,19 @@ S = st.sidebar.number_input(
 total_infections = current_hosp / Penn_market_share / hosp_rate
 detection_prob = initial_infections / total_infections
 
+def r_naught_from_doublingtime(doubling_time, gamma=1/14.):
+    """Compute R0 from doubling time and duration
+    of infectiousness. Valid during initial phase of 
+    outbreak when I << S."""
+    return (2**(1/doubling_time) -1)/gamma
+
+recovery_days = 14.0
+# mean recovery rate, gamma, (in 1/days).
+gamma = 1 / recovery_days
+
+r_naught = r_naught_from_doublingtime(doubling_time, gamma)
+
+
 st.title("COVID-19 Hospital Impact Model for Epidemics")
 st.markdown(
     """*This tool was developed by the [Predictive Healthcare team](http://predictivehealthcare.pennmedicine.org/) at Penn Medicine. For questions and comments please see our [contact page](http://predictivehealthcare.pennmedicine.org/contact/).* **If you see any error messages please reload the page.**"""
@@ -90,7 +103,14 @@ First, we need to express the two parameters $\\beta$ and $\\gamma$ in terms of 
     st.markdown("""
 - Since the rate of new infections in the SIR model is $g = \\beta S - \\gamma$, and we've already computed $\\gamma$, $\\beta$ becomes a function of the initial population size of susceptible individuals.
 $$\\beta = (g + \\gamma)/s$$
+""")
 
+    st.markdown("""The implicit $R_0$ based on a doubling time of {doubling_time} days, and an infectious duration of {recovery_days} days is {r_naught:.2f}.""".format(
+        doubling_time=doubling_time,
+        recovery_days=recovery_days,
+        r_naught=r_naught
+        ))
+    st.markdown("""
 ### Initial Conditions
 
 - The total size of the susceptible population will be the entire catchment area for Penn Medicine entities (HUP, PAH, PMC, CCH)
@@ -149,10 +169,6 @@ def sim_sir(S, I, R, beta, gamma, n_days, beta_decay=None):
 S, I, R = S, initial_infections / detection_prob, 0
 
 intrinsic_growth_rate = 2 ** (1 / doubling_time) - 1
-
-recovery_days = 14.0
-# mean recovery rate, gamma, (in 1/days).
-gamma = 1 / recovery_days
 
 # Contact rate, beta
 beta = (
