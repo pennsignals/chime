@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 hide_menu_style = """
         <style>
@@ -51,6 +52,8 @@ Penn_market_share = (
 S = st.sidebar.number_input(
     "Regional Population", value=S_default, step=100000, format="%i"
 )
+
+y_axis_scale = st.sidebar.radio("Y-axis Legend Scale", ("linear", "log"))
 
 total_infections = current_hosp / Penn_market_share / hosp_rate
 detection_prob = initial_infections / total_infections
@@ -200,6 +203,8 @@ ax.legend(loc=0)
 ax.set_xlabel("Days from today")
 ax.grid("on")
 ax.set_ylabel("Daily Admissions")
+ax.set_yscale(y_axis_scale)
+ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
 st.pyplot()
 
 admits_table = projection_admits[np.mod(projection_admits.index, 7) == 0].copy()
@@ -238,6 +243,8 @@ for k, los in los_dict.items():
 ax.set_xlabel("Days from today")
 ax.grid("on")
 ax.set_ylabel("Census")
+ax.set_yscale(y_axis_scale)
+ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
 st.pyplot()
 
 census_df = pd.DataFrame(census_dict)
@@ -265,6 +272,8 @@ if st.checkbox("Show Additional Projections"):
     ax.legend(loc=0)
     ax.set_xlabel("days from today")
     ax.set_ylabel("Case Volume")
+    ax.set_yscale(y_axis_scale)
+    ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
     ax.grid("on")
     st.pyplot()
 
@@ -276,7 +285,7 @@ if st.checkbox("Show Additional Projections"):
     infect_table = (projection_area.iloc[::7, :]).apply(np.floor)
     infect_table.index = range(infect_table.shape[0])
 
-    if st.checkbox("Show Raw SIR Similation Data"):
+    if st.checkbox("Show Raw SIR Simulation Data"):
         st.dataframe(infect_table)
 
 st.subheader("References & Acknowledgements")
