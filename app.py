@@ -22,9 +22,9 @@ known_infections = 63 # update daily
 known_cases = 4 # update daily
 
 # Widgets
-current_hosp = st.sidebar.number_input(
-    "Currently Hospitalized COVID-19 Patients", value=known_cases, step=1, format="%i"
-)
+detection_prob = (st.sidebar.number_input(
+    "Probability of Detection (%)", 0, 100, value=5, step=1, format="%i"
+)/ 100.0)
 initial_infections = st.sidebar.number_input(
     "Currently Known Regional Infections", value=known_infections, step=10, format="%i"
 )
@@ -55,10 +55,10 @@ S = st.sidebar.number_input(
     "Regional Population", value=S_default, step=100000, format="%i"
 )
 
-total_infections = current_hosp / Penn_market_share / hosp_rate
-detection_prob = initial_infections / total_infections
+#estimated current infection total
+total_infections = initial_infections / detection_prob
 
-S, I, R = S, initial_infections / detection_prob, 0
+S, I, R = S, total_infections, 0
 
 intrinsic_growth_rate = 2 ** (1 / doubling_time) - 1
 
@@ -81,18 +81,12 @@ Penn Medicine. For questions and comments please see our
 Join our [Slack channel](https://codeforphilly.org/chat?channel=covid19-chime-penn) if you would like to get involved!*""")
 
 st.markdown(
-    """The estimated number of currently infected individuals is **{total_infections:.0f}**. The **{initial_infections}** 
-confirmed cases in the region imply a **{detection_prob:.0%}** rate of detection. This is based on current inputs for 
-Hospitalizations (**{current_hosp}**), Hospitalization rate (**{hosp_rate:.0%}**), Region size (**{S}**), 
-and Hospital market share (**{Penn_market_share:.0%}**).
+    """Assuming a **{detection_prob:.0%}** rate of detection, the current number of confirmed cases, **{initial_infections}**,
+implies the current total number of infections is **{total_infections:.0f}**.
 
 A doubling time of {doubling_time} days and a recovery time of {recovery_days} days imply an $R_0$ of {r_naught:.2f}.
 """.format(
         total_infections=total_infections,
-        current_hosp=current_hosp,
-        hosp_rate=hosp_rate,
-        S=S,
-        Penn_market_share=Penn_market_share,
         initial_infections=initial_infections,
         detection_prob=detection_prob,
         recovery_days=recovery_days,
@@ -368,16 +362,16 @@ if st.checkbox("Show Additional Projections"):
 st.subheader("Guidance on Selecting Inputs")
 st.markdown(
     """* **Hospitalized COVID-19 Patients:** The number of patients currently hospitalized with COVID-19. This number is used in conjunction with Hospital Market Share and Hospitalization % to estimate the total number of infected individuals in your region.
-* **Currently Known Regional Infections**: The number of infections reported in your hospital's catchment region. This input is used to estimate the detection rate of infected individuals. 
-* **Doubling Time (days):** This parameter drives the rate of new cases during the early phases of the outbreak. The American Hospital Association currently projects doubling rates between 7 and 10 days. The doubling time will be higher (slower spread) or lower (faster spread) depending on the amount of social distancing in your region. 
+* **Currently Known Regional Infections**: The number of infections reported in your hospital's catchment region. This input is used to estimate the detection rate of infected individuals.
+* **Doubling Time (days):** This parameter drives the rate of new cases during the early phases of the outbreak. The American Hospital Association currently projects doubling rates between 7 and 10 days. The doubling time will be higher (slower spread) or lower (faster spread) depending on the amount of social distancing in your region.
 * **Hospitalization %(total infections):** Percentage of **all** infected cases which will need hospitalization.
 * **ICU %(total infections):** Percentage of **all** infected cases which will need to be treated in an ICU.
 * **Ventilated %(total infections):** Percentage of **all** infected cases which will need mechanical ventilation.
-* **Hospital Length of Stay:** Average number of days of treatment needed for hospitalized COVID-19 patients. 
+* **Hospital Length of Stay:** Average number of days of treatment needed for hospitalized COVID-19 patients.
 * **ICU Length of Stay:** Average number of days of ICU treatment needed for ICU COVID-19 patients.
 * **Vent Length of Stay:**  Average number of days of ventilation needed for ventilated COVID-19 patients.
 * **Hospital Market Share (%):** The proportion of patients in the region that are likely to come to your hospital (as oppossed to other hospitals in the region) when they get sick. One way to estimate this is to look at all of the hospitals in your region and add up all of the beds. The number of beds at your hospital divided by the total number of beds in the region times 100 will give you a reasonable starting estimate.
-* **Regional Population:** Total population size of the catchment region of your hospital(s). 
+* **Regional Population:** Total population size of the catchment region of your hospital(s).
     """
 )
 
