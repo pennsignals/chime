@@ -1,0 +1,14 @@
+---
+name: Chime
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build container
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: |
+        cp .env.example .env
+        docker-compose up
+
