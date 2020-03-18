@@ -25,9 +25,11 @@ known_cases = 4 # update daily
 current_hosp = st.sidebar.number_input(
     "Currently Hospitalized COVID-19 Patients", value=known_cases, step=1, format="%i"
 )
+
 initial_infections = st.sidebar.number_input(
     "Currently Known Regional Infections", value=known_infections, step=10, format="%i"
 )
+
 doubling_time = st.sidebar.number_input(
     "Doubling time before social distancing (days)", value=6, step=1, format="%i"
 )
@@ -79,32 +81,32 @@ r_t = beta / gamma * S # r_t is r_0 after distancing
 r_naught = r_t / (1-relative_contact_rate)
 doubling_time_t = 1/np.log2(beta*S - gamma +1) # doubling time after distancing
 
-st.title("COVID-19 Hospital Impact Model for Epidemics")
-st.markdown(
-    """*This tool was developed by the [Predictive Healthcare team](http://predictivehealthcare.pennmedicine.org/) at
-Penn Medicine. For questions and comments please see our
-[contact page](http://predictivehealthcare.pennmedicine.org/contact/). Code can be found on [Github](https://github.com/pennsignals/chime).
-Join our [Slack channel](https://codeforphilly.org/chat?channel=covid19-chime-penn) if you would like to get involved!*""")
+def head():
+    st.title("COVID-19 Hospital Impact Model for Epidemics")
+    st.markdown(
+        """*This tool was developed by the [Predictive Healthcare team](http://predictivehealthcare.pennmedicine.org/) at
+    Penn Medicine. For questions and comments please see our
+    [contact page](http://predictivehealthcare.pennmedicine.org/contact/). Code can be found on [Github](https://github.com/pennsignals/chime).
+    Join our [Slack channel](https://codeforphilly.org/chat?channel=covid19-chime-penn) if you would like to get involved!*""")
 
-st.markdown(
-    """The estimated number of currently infected individuals is **{total_infections:.0f}**. The **{initial_infections}** 
-confirmed cases in the region imply a **{detection_prob:.0%}** rate of detection. This is based on current inputs for 
-Hospitalizations (**{current_hosp}**), Hospitalization rate (**{hosp_rate:.0%}**), Region size (**{S}**), 
-and Hospital market share (**{Penn_market_share:.0%}**).
+    st.markdown(
+        """The estimated number of currently infected individuals is **{total_infections:.0f}**. The **{initial_infections}**
+    confirmed cases in the region imply a **{detection_prob:.0%}** rate of detection. This is based on current inputs for
+    Hospitalizations (**{current_hosp}**), Hospitalization rate (**{hosp_rate:.0%}**), Region size (**{S}**),
+    and Hospital market share (**{Penn_market_share:.0%}**).
 
-An initial doubling time of **{doubling_time}** days and a recovery time of **{recovery_days}** days imply an $R_0$ of 
+An initial doubling time of **{doubling_time}** days and a recovery time of **{recovery_days}** days imply an $R_0$ of
 **{r_naught:.2f}**.
 
-**Mitigation**: A **{relative_contact_rate:.0%}** reduction in social contact after the onset of the 
-outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying an effective $R_t$ of **${r_t:.2f}$**.
+**Mitigation**: A **{relative_contact_rate:.0%}** reduction in social contact after the onset of the outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying an effective $R_t$ of **${r_t:.2f}$**.
 """.format(
         total_infections=total_infections,
+        initial_infections=initial_infections,
+        detection_prob=detection_prob,
         current_hosp=current_hosp,
         hosp_rate=hosp_rate,
         S=S,
         Penn_market_share=Penn_market_share,
-        initial_infections=initial_infections,
-        detection_prob=detection_prob,
         recovery_days=recovery_days,
         r_naught=r_naught,
         doubling_time=doubling_time,
@@ -112,12 +114,15 @@ outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying a
         r_t=r_t,
         doubling_time_t=doubling_time_t
     )
-)
+    )
 
+    return None
 
+head()
 
+def show_more_info_about_this_tool():
+    """a lot of streamlit writing to screen."""
 
-if st.checkbox("Show more info about this tool"):
     st.subheader(
         "[Discrete-time SIR modeling](https://mathworld.wolfram.com/SIRModel.html) of infections/recovery"
     )
@@ -167,10 +172,10 @@ A doubling time of {doubling_time} days and a recovery time of {recovery_days} d
 
 #### Effect of social distancing
 
-After the beginning of the outbreak, actions to reduce social contact will lower the parameter $c$.  If this happens at 
-time $t$, then the number of people infected by any given infected person is $R_t$, which will be lower than $R_0$.  
+After the beginning of the outbreak, actions to reduce social contact will lower the parameter $c$.  If this happens at
+time $t$, then the number of people infected by any given infected person is $R_t$, which will be lower than $R_0$.
 
-A {relative_contact_rate:.0%} reduction in social contact would increase the time it takes for the outbreak to double, 
+A {relative_contact_rate:.0%} reduction in social contact would increase the time it takes for the outbreak to double,
 to {doubling_time_t:.2f} days from {doubling_time:.2f} days, with a $R_t$ of {r_t:.2f}.
 
 #### Using the model
@@ -209,6 +214,10 @@ $$\\beta = (g + \\gamma)$$.
             philly=philly,
         )
     )
+    return None
+
+if st.checkbox("Show more info about this tool"):
+    show_more_info_about_this_tool()
 
 # The SIR model, one time step
 def sir(y, beta, gamma, N):
@@ -291,12 +300,13 @@ def new_admissions_chart(projection_admits: pd.DataFrame, plot_projection_days: 
 st.altair_chart(new_admissions_chart(projection_admits, plot_projection_days), use_container_width=True)
 
 
-admits_table = projection_admits[np.mod(projection_admits.index, 7) == 0].copy()
-admits_table["day"] = admits_table.index
-admits_table.index = range(admits_table.shape[0])
-admits_table = admits_table.fillna(0).astype(int)
 
 if st.checkbox("Show Projected Admissions in tabular form"):
+    admits_table = projection_admits[np.mod(projection_admits.index, 7) == 0].copy()
+    admits_table["day"] = admits_table.index
+    admits_table.index = range(admits_table.shape[0])
+    admits_table = admits_table.fillna(0).astype(int)
+
     st.dataframe(admits_table)
 
 st.subheader("Admitted Patients (Census)")
@@ -304,31 +314,36 @@ st.markdown(
     "Projected **census** of COVID-19 patients, accounting for arrivals and discharges at Penn hospitals"
 )
 
-# ALOS for each category of COVID-19 case (total guesses)
+def _census_table(projection_admits, hosp_los, icu_los, vent_los) -> pd.DataFrame:
+    """ALOS for each category of COVID-19 case (total guesses)"""
 
-los_dict = {
-    "hosp": hosp_los,
-    "icu": icu_los,
-    "vent": vent_los,
-}
+    los_dict = {
+        "hosp": hosp_los,
+        "icu": icu_los,
+        "vent": vent_los,
+    }
 
-census_dict = dict()
-for k, los in los_dict.items():
-    census = (
-        projection_admits.cumsum().iloc[:-los, :]
-        - projection_admits.cumsum().shift(los).fillna(0)
-    ).apply(np.ceil)
-    census_dict[k] = census[k]
+    census_dict = dict()
+    for k, los in los_dict.items():
+        census = (
+            projection_admits.cumsum().iloc[:-los, :]
+            - projection_admits.cumsum().shift(los).fillna(0)
+        ).apply(np.ceil)
+        census_dict[k] = census[k]
 
 
-census_df = pd.DataFrame(census_dict)
-census_df["day"] = census_df.index
-census_df = census_df[["day", "hosp", "icu", "vent"]]
+    census_df = pd.DataFrame(census_dict)
+    census_df["day"] = census_df.index
+    census_df = census_df[["day", "hosp", "icu", "vent"]]
 
-census_table = census_df[np.mod(census_df.index, 7) == 0].copy()
-census_table.index = range(census_table.shape[0])
-census_table.loc[0, :] = 0
-census_table = census_table.dropna().astype(int)
+    census_table = census_df[np.mod(census_df.index, 7) == 0].copy()
+    census_table.index = range(census_table.shape[0])
+    census_table.loc[0, :] = 0
+    census_table = census_table.dropna().astype(int)
+
+    return census_table
+
+census_table = _census_table(projection_admits, hosp_los, icu_los, vent_los)
 
 def admitted_patients_chart(census: pd.DataFrame) -> alt.Chart:
     """docstring"""
@@ -353,58 +368,65 @@ st.altair_chart(admitted_patients_chart(census_table), use_container_width=True)
 if st.checkbox("Show Projected Census in tabular form"):
     st.dataframe(census_table)
 
+def additional_projections_chart(i: np.ndarray, r: np.ndarray) -> alt.Chart:
+    dat = pd.DataFrame({"Infected": i, "Recovered": r})
+
+    return (
+        alt
+        .Chart(dat.reset_index())
+        .transform_fold(fold=["Infected", "Recovered"])
+        .mark_line()
+        .encode(
+            x=alt.X("index", title="Days from today"),
+            y=alt.Y("value:Q", title="Case Volume"),
+            tooltip=["key:N", "value:Q"],
+            color="key:N"
+        )
+        .interactive()
+    )
+
 st.markdown(
     """**Click the checkbox below to view additional data generated by this simulation**"""
 )
-if st.checkbox("Show Additional Projections"):
+
+def show_additional_projections():
     st.subheader(
         "The number of infected and recovered individuals in the hospital catchment region at any given moment"
     )
 
-    def additional_projections_chart(i: np.ndarray, r: np.ndarray) -> alt.Chart:
-        dat = pd.DataFrame({"Infected": i, "Recovered": r})
-
-        return (
-            alt
-            .Chart(dat.reset_index())
-            .transform_fold(fold=["Infected", "Recovered"])
-            .mark_line()
-            .encode(
-                x=alt.X("index", title="Days from today"),
-                y=alt.Y("value:Q", title="Case Volume"),
-                tooltip=["key:N", "value:Q"],
-                color="key:N"
-            )
-            .interactive()
-        )
-
     st.altair_chart(additional_projections_chart(i, r), use_container_width=True)
 
-    # Show data
-    days = np.array(range(0, n_days + 1))
-    data_list = [days, s, i, r]
-    data_dict = dict(zip(["day", "susceptible", "infections", "recovered"], data_list))
-    projection_area = pd.DataFrame.from_dict(data_dict)
-    infect_table = (projection_area.iloc[::7, :]).apply(np.floor)
-    infect_table.index = range(infect_table.shape[0])
-
     if st.checkbox("Show Raw SIR Similation Data"):
+        # Show data
+        days = np.array(range(0, n_days + 1))
+        data_list = [days, s, i, r]
+        data_dict = dict(zip(["day", "susceptible", "infections", "recovered"], data_list))
+        projection_area = pd.DataFrame.from_dict(data_dict)
+        infect_table = (projection_area.iloc[::7, :]).apply(np.floor)
+        infect_table.index = range(infect_table.shape[0])
+
         st.dataframe(infect_table)
+
+if st.checkbox("Show Additional Projections"):
+    show_additional_projections()
+
+
+# Definitions and footer
 
 st.subheader("Guidance on Selecting Inputs")
 st.markdown(
     """* **Hospitalized COVID-19 Patients:** The number of patients currently hospitalized with COVID-19. This number is used in conjunction with Hospital Market Share and Hospitalization % to estimate the total number of infected individuals in your region.
-* **Currently Known Regional Infections**: The number of infections reported in your hospital's catchment region. This input is used to estimate the detection rate of infected individuals. 
-* **Doubling Time (days):** This parameter drives the rate of new cases during the early phases of the outbreak. The American Hospital Association currently projects doubling rates between 7 and 10 days. This is the doubling time you expect under status quo conditions. To account for reduced contact and other public health interventions, modify the _Social distancing_ input. 
+* **Currently Known Regional Infections**: The number of infections reported in your hospital's catchment region. This input is used to estimate the detection rate of infected individuals.
+* **Doubling Time (days):** This parameter drives the rate of new cases during the early phases of the outbreak. The American Hospital Association currently projects doubling rates between 7 and 10 days. This is the doubling time you expect under status quo conditions. To account for reduced contact and other public health interventions, modify the _Social distancing_ input.
 * **Social distancing (% reduction in person-to-person physical contact):** This parameter allows users to explore how reduction in interpersonal contact & transmission (hand-washing) might slow the rate of new infections. It is your estimate of how much social contact reduction is being achieved in your region relative to the status quo. While it is unclear how much any given policy might affect social contact (eg. school closures or remote work), this parameter lets you see how projections change with percentage reductions in social contact.
 * **Hospitalization %(total infections):** Percentage of **all** infected cases which will need hospitalization.
 * **ICU %(total infections):** Percentage of **all** infected cases which will need to be treated in an ICU.
 * **Ventilated %(total infections):** Percentage of **all** infected cases which will need mechanical ventilation.
-* **Hospital Length of Stay:** Average number of days of treatment needed for hospitalized COVID-19 patients. 
+* **Hospital Length of Stay:** Average number of days of treatment needed for hospitalized COVID-19 patients.
 * **ICU Length of Stay:** Average number of days of ICU treatment needed for ICU COVID-19 patients.
 * **Vent Length of Stay:**  Average number of days of ventilation needed for ventilated COVID-19 patients.
 * **Hospital Market Share (%):** The proportion of patients in the region that are likely to come to your hospital (as opposed to other hospitals in the region) when they get sick. One way to estimate this is to look at all of the hospitals in your region and add up all of the beds. The number of beds at your hospital divided by the total number of beds in the region times 100 will give you a reasonable starting estimate.
-* **Regional Population:** Total population size of the catchment region of your hospital(s). 
+* **Regional Population:** Total population size of the catchment region of your hospital(s).
     """
 )
 
