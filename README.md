@@ -33,6 +33,9 @@ Copy `.env.example` to be `.env` and run the container.
 ```bash
 cp .env.example .env
 docker-compose up
+
+# or to scale the number of streamlit containers
+# docker-compose up --scale app=4
 ```
 
 You should be able to view the app via `localhost:8000`. If you want to change the
