@@ -98,9 +98,7 @@ def head():
 An initial doubling time of **{doubling_time}** days and a recovery time of **{recovery_days}** days imply an $R_0$ of
 **{r_naught:.2f}**.
 
-**Mitigation**: A **{relative_contact_rate:.0%}** reduction in social contact after the onset of the
-
-outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying an effective $R_t$ of **${r_t:.2f}$**.
+**Mitigation**: A **{relative_contact_rate:.0%}** reduction in social contact after the onset of the outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying an effective $R_t$ of **${r_t:.2f}$**.
 """.format(
         total_infections=total_infections,
         initial_infections=initial_infections,
