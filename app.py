@@ -33,7 +33,6 @@ initial_infections = st.sidebar.number_input(
 doubling_time = st.sidebar.number_input(
     "Doubling time before social distancing (days)", value=6, step=1, format="%i"
 )
-
 relative_contact_rate = st.sidebar.number_input(
     "Social distancing (% reduction in social contact)", 0, 100, value=0, step=5, format="%i"
 )/100.0
@@ -90,7 +89,6 @@ def head():
     [contact page](http://predictivehealthcare.pennmedicine.org/contact/). Code can be found on [Github](https://github.com/pennsignals/chime).
     Join our [Slack channel](https://codeforphilly.org/chat?channel=covid19-chime-penn) if you would like to get involved!*""")
 
-
     st.markdown(
         """The estimated number of currently infected individuals is **{total_infections:.0f}**. The **{initial_infections}**
     confirmed cases in the region imply a **{detection_prob:.0%}** rate of detection. This is based on current inputs for
@@ -101,6 +99,7 @@ An initial doubling time of **{doubling_time}** days and a recovery time of **{r
 **{r_naught:.2f}**.
 
 **Mitigation**: A **{relative_contact_rate:.0%}** reduction in social contact after the onset of the
+
 outbreak reduces the doubling time to **{doubling_time_t:.1f}** days, implying an effective $R_t$ of **${r_t:.2f}$**.
 """.format(
         total_infections=total_infections,
@@ -125,6 +124,7 @@ head()
 
 def show_more_info_about_this_tool():
     """a lot of streamlit writing to screen."""
+
     st.subheader(
         "[Discrete-time SIR modeling](https://mathworld.wolfram.com/SIRModel.html) of infections/recovery"
     )
@@ -408,7 +408,6 @@ def show_additional_projections():
         infect_table.index = range(infect_table.shape[0])
 
         st.dataframe(infect_table)
-
 
 if st.checkbox("Show Additional Projections"):
     show_additional_projections()
