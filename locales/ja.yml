@@ -1,0 +1,133 @@
+ja:
+  "Currently Known Regional Infections (only used to compute detection rate - does not change projections)": "現在知られている地域の感染人数 (検出率産出のみに用いられ、予測に影響しません)"
+  "Currently Hospitalized COVID-19 Patients": "現在入院中のCOVID-19患者数"
+  "Doubling time before social distancing (days)": "社会的隔離を行う前の患者倍加時間 (日数)"
+  "Social distancing (% reduction in social contact)": "社会的隔離 (社会的接触の減少割合 %)"
+  "Hospitalization %(total infections)": "入院患者数 %(総感染者数中)"
+  "ICU %(total infections)": "集中治療室患者数 %(総感染者数中)"
+  "Ventilated %(total infections)": "人工呼吸器患者数 %(総感染者数中)"
+  "Hospital Length of Stay": "平均入院日数"
+  "ICU Length of Stay": "平均集中治療室利用日数"
+  "Vent Length of Stay": "平均人工呼吸器利用日数"
+  "Hospital Market Share (%)": "地域での病院の患者シェア (%)"
+  "Regional Population": "地域の人口"
+  "Penn Medicine - COVID-19 Hospital Impact Model for Epidemics": |+
+    <link rel="stylesheet" href="https://www1.pennmedicine.org/styles/shared/penn-medicine-header.css">
+
+    <div class="penn-medicine-header__content">
+    <a href="https://www.pennmedicine.org" class="penn-medicine-header__logo"
+    title="Penn Medicineのホームページへ行く">Penn Medicine</a>
+    <a id="title" class="penn-medicine-header__title">Penn Medicine - COVID-19における伝染病の病院影響モデル</a>
+    </div>
+  "This tool was developed by...": |+
+    *このツールはペンシルバニア州立大学の医療部門であるPenn Medicineの、[予測医療チーム](http://predictivehealthcare.pennmedicine.org/)によって開発されました。
+    質問やコメントは我々の[コンタクトページ](http://predictivehealthcare.pennmedicine.org/contact/)で受け付けています(英語のみ)。
+    ソースコードは[Github](https://github.com/pennsignals/chime)で配布されています。
+    開発に参加したい場合は是非我々の[Slackチャンネル](https://codeforphilly.org/chat?channel=covid19-chime-penn)に参加してください！*
+  "The estimated number of currently infected...": |+
+    現在の予測感染者人数は**{total_infections:.0f}**人です。
+    この地域で確認された感染事例は**{initial_infections}**例で、検出率は**{detection_prob:.0%}**にあたります。
+    この結果は入院患者数(**{current_hosp}**)、患者の入院割合(**{hosp_rate:.0%}**)、地域の人口(**{S}**)および病院の地域での患者シェア(**{Penn_market_share:.0%}**)を元に計算されています。
+
+    初期倍加時間が**{doubling_time}**日で、回復時間が**{recovery_days}**であれば、$R_0$は**{r_naught:.2f}**となります。
+
+    **緩和**: アウトブレイク発生後の社会的接触が**{relative_contact_rate:.0%}**減少すると、倍加時間は**{doubling_time_t:.1f}**日に改善され、実効$R_t$は**${r_t:.2f}$**となります。
+  "Show more info about this tool": "さらにこのツールの情報を表示する"
+  "Discrete-time SIR modeling": "[Discrete-time SIR modeling](https://mathworld.wolfram.com/SIRModel.html) of infections/recovery"
+  "The model consists of individuals who are either...": |+
+    The model consists of individuals who are either _Susceptible_ ($S$), _Infected_ ($I$), or _Recovered_ ($R$).
+
+    The epidemic proceeds via a growth and decline process. This is the core model of infectious disease spread and has been in use in epidemiology for many years.
+  "The dynamics are given by the following 3 equations.": "The dynamics are given by the following 3 equations."
+  "To project the expected impact to Penn Medicine...": |+
+    To project the expected impact to Penn Medicine, we estimate the terms of the model.
+
+    To do this, we use a combination of estimates from other locations, informed estimates based on logical reasoning, and best guesses from the American Hospital Association.
+
+
+    ### Parameters
+
+    The model's parameters, $\beta$ and $\gamma$, determine the virulence of the epidemic.
+
+    $$\beta$$ can be interpreted as the _effective contact rate_:
+  "which is the transmissibility multiplied...": |+
+    which is the transmissibility ($\tau$) multiplied by the average number of people exposed ($$c$$).  The transmissibility is the basic virulence of the pathogen.  The number of people exposed $c$ is the parameter that can be changed through social distancing.
+
+    $\gamma$ is the inverse of the mean recovery time, in days.  I.e.: if $\gamma = 1/{recovery_days}$, then the average infection will clear in {recovery_days} days.
+
+    An important descriptive parameter is the _basic reproduction number_, or $R_0$.  This represents the average number of people who will be infected by any given infected person.  When $R_0$ is greater than 1, it means that a disease will grow.  Higher $R_0$'s imply more rapid growth.  It is defined as
+  "$R_0$ gets bigger when...": |+
+
+    $R_0$ gets bigger when
+
+    - there are more contacts between people
+    - when the pathogen is more virulent
+    - when people have the pathogen for longer periods of time
+
+    A doubling time of {doubling_time} days and a recovery time of {recovery_days} days imply an $R_0$ of {r_naught:.2f}.
+
+    #### Effect of social distancing
+
+    After the beginning of the outbreak, actions to reduce social contact will lower the parameter $c$.  If this happens at
+    time $t$, then the number of people infected by any given infected person is $R_t$, which will be lower than $R_0$.
+
+    A {relative_contact_rate:.0%} reduction in social contact would increase the time it takes for the outbreak to double,
+    to {doubling_time_t:.2f} days from {doubling_time:.2f} days, with a $R_t$ of {r_t:.2f}.
+
+    #### Using the model
+
+    We need to express the two parameters $\beta$ and $\gamma$ in terms of quantities we can estimate.
+
+    - $\gamma$:  the CDC is recommending 14 days of self-quarantine, we'll use $\gamma = 1/{recovery_days}$.
+    - To estimate $$\beta$$ directly, we'd need to know transmissibility and social contact rates.  since we don't know these things, we can extract it from known _doubling times_.  The AHA says to expect a doubling time $T_d$ of 7-10 days. That means an early-phase rate of growth can be computed by using the doubling time formula:
+  "Since the rate of new infections in the SIR model...": |+
+    - Since the rate of new infections in the SIR model is $g = \beta S - \gamma$, and we've already computed $\gamma$, $\beta$ becomes a function of the initial population size of susceptible individuals.
+    $$\beta = (g + \gamma)$$.
+
+
+    ### Initial Conditions
+
+    - The total size of the susceptible population will be the entire catchment area for Penn Medicine entities (HUP, PAH, PMC, CCH)
+      - Delaware = {delaware}
+      - Chester = {chester}
+      - Montgomery = {montgomery}
+      - Bucks = {bucks}
+      - Philly = {philly}
+  "Number of days to project": "予測する日数"
+  "New Admissions": "新規人数"
+  "Projected number of **daily** COVID-19 admissions at Penn hospitals": "Penn病院での**日毎の**COVID-19関連新規人数予測"
+  "Hospitalized": "入院患者数"
+  "ICU": "集中治療室患者数"
+  "Ventilated": "人工呼吸器患者数"
+  "Days from today": "今日からの日数"
+  "Daily admissions": "日毎の人数"
+  "Show Projected Admissions in tabular form": "予測された人数を表形式で見る"
+  "Admitted Patients (Census)": "入院患者(国勢調査)"
+  "Projected **census** of COVID-19 patients, accounting for arrivals and discharges at Penn hospitals": "Penn病院における入院と退院を考慮したCOVID-19患者の予測**国勢調査**"
+  "Hospital Census": "国勢調査 入院患者数"
+  "ICU Census": "国勢調査 集中治療室患者数"
+  "Ventilated Census": "国勢調査 人工呼吸器患者数"
+  "Census": "国勢調査"
+  "Show Projected Census in tabular form": "予測された国勢調査を表形式で見る"
+  "Infected": "感染者数"
+  "Recovered": "回復者数"
+  "Case Volume": "件数"
+  "**Click the checkbox below to view additional data generated by this simulation**": "**このシミュレーションで生成されたその他のデータを見るには下のチェックボックスをクリック**"
+  "The number of infected and recovered individuals in the hospital catchment region at any given moment": "病院の集患者域における感染者数と回復者数"
+  "Show Raw SIR Similation Data": "生のSIRモデルシミュレーションデータを表示"
+  "Show Additional Projections": "その他の予測を表示"
+  "Guidance on Selecting Inputs": "選択した値の入力についてのガイダンス"
+  "**Hospitalized COVID-19 Patients:**...": |+
+    * **Hospitalized COVID-19 Patients:** The number of patients currently hospitalized with COVID-19 **at your hospital(s)**. This number is used in conjunction with Hospital Market Share and Hospitalization % to estimate the total number of infected individuals in your region.
+    * **Doubling Time (days):** This parameter drives the rate of new cases during the early phases of the outbreak. The American Hospital Association currently projects doubling rates between 7 and 10 days. This is the doubling time you expect under status quo conditions. To account for reduced contact and other public health interventions, modify the _Social distancing_ input.
+    * **Social distancing (% reduction in person-to-person physical contact):** This parameter allows users to explore how reduction in interpersonal contact & transmission (hand-washing) might slow the rate of new infections. It is your estimate of how much social contact reduction is being achieved in your region relative to the status quo. While it is unclear how much any given policy might affect social contact (eg. school closures or remote work), this parameter lets you see how projections change with percentage reductions in social contact.
+    * **Hospitalization %(total infections):** Percentage of **all** infected cases which will need hospitalization.
+    * **ICU %(total infections):** Percentage of **all** infected cases which will need to be treated in an ICU.
+    * **Ventilated %(total infections):** Percentage of **all** infected cases which will need mechanical ventilation.
+    * **Hospital Length of Stay:** Average number of days of treatment needed for hospitalized COVID-19 patients.
+    * **ICU Length of Stay:** Average number of days of ICU treatment needed for ICU COVID-19 patients.
+    * **Vent Length of Stay:**  Average number of days of ventilation needed for ventilated COVID-19 patients.
+    * **Hospital Market Share (%):** The proportion of patients in the region that are likely to come to your hospital (as opposed to other hospitals in the region) when they get sick. One way to estimate this is to look at all of the hospitals in your region and add up all of the beds. The number of beds at your hospital divided by the total number of beds in the region times 100 will give you a reasonable starting estimate.
+    * **Regional Population:** Total population size of the catchment region of your hospital(s).
+    * **Currently Known Regional Infections**: The number of infections reported in your hospital's catchment region. This is only used to compute detection rate - **it will not change projections**. This input is used to estimate the detection rate of infected individuals.
+  "References & Acknowledgements": "参考資料と謝辞"
