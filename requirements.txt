@@ -3,3 +3,5 @@ pandas
 numpy
 pytest
 altair
+python-i18n
+pyyaml
