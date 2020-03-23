@@ -273,18 +273,35 @@ hosp = i * hosp_rate * Penn_market_share
 icu = i * icu_rate * Penn_market_share
 vent = i * vent_rate * Penn_market_share
 
+# Recovered
+r_hosp = r * hosp_rate * Penn_market_share
+r_icu = r * icu_rate * Penn_market_share
+r_vent = r * vent_rate * Penn_market_share
+
+
+
 days = np.array(range(0, n_days + 1))
 data_list = [days, hosp, icu, vent]
 data_dict = dict(zip(["day", "hosp", "icu", "vent"], data_list))
 
+
+r_data_list = [days, r_hosp, r_icu, r_vent]
+r_data_dict = dict(zip(["day", "hosp", "icu", "vent"], r_data_list))
+
+
 projection = pd.DataFrame.from_dict(data_dict)
+
+r_projection = pd.DataFrame.from_dict(r_data_dict)
 
 st.subheader("New Admissions")
 st.markdown("Projected number of **daily** COVID-19 admissions at Penn hospitals")
 
 # New cases
 projection_admits = projection.iloc[:-1, :] - projection.shift(1)
-projection_admits[projection_admits < 0] = 0
+r_projection_admits = r_projection.iloc[:-1, :] - r_projection.shift(1)
+
+projection_admits = projection_admits + r_projection_admits
+#projection_admits[projection_admits < 0] = 0
 
 plot_projection_days = n_days - 10
 projection_admits["day"] = range(projection_admits.shape[0])
